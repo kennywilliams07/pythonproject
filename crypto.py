@@ -1,35 +1,47 @@
-from requests import Request, Session
-from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
-import json
+import pandas as pd
+import numpy as np
+import requests
 
-url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
-parameters = {
-    'start': 1,
-    'limit': 5,
-    'convert': 'USD'
-}
+class DataGrab:
+    def getBinanceSpot(self):
+        """
+        Pulls Binance Spot Prices. Returns dataframe with: ask, bid, price, volume, base, quotem spread, exchange.
+        Requests all data at once w/ 1 API pull
+        Reference: https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.m
+        """
+        def splitPair(tickerString):
+            if tickerString[-4:] == 'USDT':
+                return [tickerString.split('USDT')[0].lower(), 'usdt']
+            elif tickerString[-3:] == 'ETH':
+                return [tickerString.split('ETH')[0].lower(), 'eth']
+            elif tickerString[-3:] == 'BTC':
+                return[tickerString.split('BTC')[0].lower(), 'BTC']
+            elif tickerString[-3] == 'BNB':
+                return [tickerString.split('BNB')[0].lower(), 'bnb']
+            return np.nan
 
-headers = {
-    'Accepts': 'application/json',
-    'X-CMC_PRO_API_KEY': 'b49cfe6e-6793-4201-aa44-9cdff4767d71',
-}
+        url = 'https://api.binance.com/api/v1/ticker/24hr'
+        bnn_df = pd.DataFrame(requests.get(url).json())
+        # print(bnn_df)
 
-session = Session()
-session.headers.update(headers)
+        bnn_df['symbol'] = bnn_df.apply(lambda x: splitPair(x['symbol']), axis=1)
+        bnn_df = bnn_df.dropna()
+        bnn_df['base'] = bnn_df.apply(lambda x: x['symbol'][0], axis=1)
+        bnn_df['quote'] = bnn_df.apply(lambda x: x['symbol'][1], axis=1)
+        bnn_df['quote'] = bnn_df['quote'].str.replace('usdt', 'usd')
+        bnn_df = bnn_df.rename(index=str, columns={'askPrice': 'ask',
+                                                  'bidPrice': 'bid',
+                                                  'lastPrice': 'price'})
+        columns = ['ask', 'bid', 'price', 'volume']
+        bnn_df['exchange'] = 'binance'
+        bnn_df[columns] = bnn_df[columns].astype(float)
+        bnn_df['spread'] = bnn_df.ask - bnn_df.bid
+        columns.extend(['base', 'quote', 'spread', 'exchange'])
+        bnn_df = bnn_df[columns]
 
-try:
-    response = session.get(url, params=parameters)
-    data = json.loads(response.text)
-    print(data)
-except (ConnectionError, Timeout, TooManyRedirects) as e:
-    print(e)
+        bnn_df['ticker'] = bnn_df.apply(lambda x: x['base'] + '-' + x['quote'], axis=1).tolist()
+        bnn_df = bnn_df[['base', 'quote', 'exchange', 'price', 'ask', 'bid', 'spread', 'volume', 'ticker']].set_index('ticker')
+        return bnn_df
 
-session = Session()
-session.headers.update(headers)
-
-try:
-    response = session.get(url, params=parameters)
-    data = json.loads(response.text)
-    print(data)
-except (ConnectionError, Timeout, TooManyRedirects) as e:
-    print(e)
+a = DataGrab().getBinanceSpot()
+print(a.to_csv('myBinanceData.csv'))
