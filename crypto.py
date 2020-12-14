@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import requests
-import sqlite3 as db
+import pandas as pd
+
 
 class DataGrab:
     def getBinanceSpot(self):
@@ -23,7 +24,7 @@ class DataGrab:
 
         url = 'https://api.binance.com/api/v1/ticker/24hr'
         bnn_df = pd.DataFrame(requests.get(url).json())
-        # print(bnn_df)
+        print(bnn_df)
 
         bnn_df['symbol'] = bnn_df.apply(lambda x: splitPair(x['symbol']), axis=1)
         bnn_df = bnn_df.dropna()
@@ -46,12 +47,3 @@ class DataGrab:
 
 a = DataGrab().getBinanceSpot()
 print(a.to_csv('myBinanceData.csv'))
-
-
-def crypto_data():
-    db_conn = db.connect('crypto.sqlite3.db')
-    cur = db_conn.cursor()
-    sql = 'SELECT * FROM myBinanceData WHERE base = eth'
-    cur.execute(sql)
-    result = cur.fetchone()
-    db_conn.close()
