@@ -4,6 +4,12 @@ Kenny Williams
 Python Project 2020 (https://github.com/kennywilliams07/pythonproject)
 ======================================================================
 
+The Three Features Met:
+-----------------------
+* Create a class, then create at least one object of that class and populate it with data
+* Read data from an external file, such as text, JSON, CSV, etc and use that data in your application
+* Connect to an external/3rd party API and read data into your app
+
 Crypto Tracker
 ==================
 
