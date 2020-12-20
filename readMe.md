@@ -39,5 +39,5 @@ If the commands return errors, try these instead:
     2. sudo pip3 install numpy
     3. sudo pip3 requests
 
-The program is now ready to run. Run the script by typing in the shell "crypto.py". After running the script, you'll notice that data prints to the terminal, returning prices, increases/decreases, etc. The script automatically converts the data
+The program is now ready to run. Run the script by typing in the shell "python crypto.py" or if that doesn't work, "python3 crypto.py". After running the script, you'll notice that data prints to the terminal, returning prices, increases/decreases, etc. The script automatically converts the data
 into a CSV file named 'myBinanceData.csv' but you can freely delete the already-supplied file and run it again and you'll see that a new one is created instantly. You can also comment out 'print(bnn_df)' located on line 26 if you'd like the data to be returned only in CSV format.
