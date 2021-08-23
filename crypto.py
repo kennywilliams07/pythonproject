@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import requests
+# fish
 
 
 class DataGrab:
@@ -25,14 +26,15 @@ class DataGrab:
         bnn_df = pd.DataFrame(requests.get(url).json())
         print(bnn_df)
 
-        bnn_df['symbol'] = bnn_df.apply(lambda x: splitPair(x['symbol']), axis=1)
+        bnn_df['symbol'] = bnn_df.apply(
+            lambda x: splitPair(x['symbol']), axis=1)
         bnn_df = bnn_df.dropna()
         bnn_df['base'] = bnn_df.apply(lambda x: x['symbol'][0], axis=1)
         bnn_df['quote'] = bnn_df.apply(lambda x: x['symbol'][1], axis=1)
         bnn_df['quote'] = bnn_df['quote'].str.replace('usdt', 'usd')
         bnn_df = bnn_df.rename(index=str, columns={'askPrice': 'ask',
-                                                  'bidPrice': 'bid',
-                                                  'lastPrice': 'price'})
+                                                   'bidPrice': 'bid',
+                                                   'lastPrice': 'price'})
         columns = ['ask', 'bid', 'price', 'volume']
         bnn_df['exchange'] = 'binance'
         bnn_df[columns] = bnn_df[columns].astype(float)
@@ -40,9 +42,12 @@ class DataGrab:
         columns.extend(['base', 'quote', 'spread', 'exchange'])
         bnn_df = bnn_df[columns]
 
-        bnn_df['ticker'] = bnn_df.apply(lambda x: x['base'] + '-' + x['quote'], axis=1).tolist()
-        bnn_df = bnn_df[['base', 'quote', 'exchange', 'price', 'ask', 'bid', 'spread', 'volume', 'ticker']].set_index('ticker')
+        bnn_df['ticker'] = bnn_df.apply(
+            lambda x: x['base'] + '-' + x['quote'], axis=1).tolist()
+        bnn_df = bnn_df[['base', 'quote', 'exchange', 'price', 'ask',
+                         'bid', 'spread', 'volume', 'ticker']].set_index('ticker')
         return bnn_df
+
 
 a = DataGrab().getBinanceSpot()
 print(a.to_csv('myBinanceData.csv'))
